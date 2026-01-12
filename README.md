@@ -2,7 +2,7 @@
 
 This is the first component of an AI-powered security monitoring system (working on this!) that tracks CVEs and checks their relevance to blockchain protocols.
 
-## What This Does
+## Overview
 
 The `CVEFetcher` class connects to the National Vulnerability Database (NVD) API and:
 - Fetches recent CVEs from the last N days
