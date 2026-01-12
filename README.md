@@ -72,20 +72,6 @@ Each CVE object contains:
 }
 ```
 
-## Next Steps
-
-To build the complete monitoring agent, you'll want to add:
-
-1. **Protocol Knowledge Base** - Store info about the protocols you're tracking (dependencies, tech stack, contract addresses)
-
-2. **Relevance Analysis** - Use LLMs/embeddings to determine if a CVE affects your tracked protocols
-
-3. **Alert System** - Send notifications when relevant CVEs are found
-
-4. **Database** - Store CVEs and analysis results persistently
-
-5. **Scheduler** - Run this periodically (daily/hourly) to catch new CVEs
-
 ## Rate Limiting Notes
 
 - Without API key: The code waits 6 seconds between requests
