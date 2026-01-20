@@ -1,6 +1,6 @@
 # CVE Fetcher
 
-A Python tool for monitoring and analyzing Common Vulnerabilities and Exposures (CVEs) from the National Vulnerability Database. This is designed as the first component of a larger security monitoring system that tracks CVEs and evaluates their relevance to blockchain protocols and smart contract ecosystems.
+A Python tool that monitors the National Vulnerability Database (NVD) for Common Vulnerabilities and Exposures (CVEs) and filters them based on user-defined keywords to identify relevant security threats.
 
 ## What It Does
 
@@ -11,8 +11,6 @@ The CVE Fetcher provides a clean interface to the NVD API v2.0, allowing you to:
 - Extract structured information including severity scores, affected products, and references
 - Automatically handle rate limiting based on whether you have an API key
 - Export results to JSON for further analysis or integration with other tools
-
-The tool is particularly useful for security teams monitoring blockchain-related vulnerabilities, but it works for any technology stack you want to track.
 
 ## Installation
 
@@ -276,9 +274,9 @@ Search for CVEs containing a specific keyword in their description.
 
 ## Resources
 
-- [NVD API Documentation](https://nvd.nist.gov/developers/vulnerabilities) - Official API reference
-- [CVSS Scoring Guide](https://www.first.org/cvss/v3.1/user-guide) - Understanding severity scores
-- [CPE Dictionary](https://nvd.nist.gov/products/cpe) - Common Platform Enumeration reference
+- [NVD API Documentation](https://nvd.nist.gov/developers/vulnerabilities): Official API reference
+- [CVSS Scoring Guide](https://www.first.org/cvss/v3.1/user-guide): Understanding severity scores
+- [CPE Dictionary](https://nvd.nist.gov/products/cpe): Common Platform Enumeration reference
 
 ## License
 
