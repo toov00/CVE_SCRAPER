@@ -80,31 +80,6 @@ This will:
 
 The output includes severity scores, publication dates, descriptions, affected products, and reference counts for each CVE.
 
-### Using the CVEFetcher Class Programmatically
-
-For more control, you can import and use the `CVEFetcher` class directly:
-
-```python
-from cve_fetcher import CVEFetcher
-
-# Initialize with or without an API key
-fetcher = CVEFetcher(api_key="your-api-key-here")
-
-# Fetch recent CVEs
-recent_cves = fetcher.fetch_recent_cves(days=7)
-
-# Filter for high severity issues
-high_severity = [
-    cve for cve in recent_cves 
-    if cve['severity'] in ['HIGH', 'CRITICAL']
-]
-
-# Search by keyword
-blockchain_cves = fetcher.search_cves_by_keyword('solidity', days=30)
-```
-
-The class methods return lists of dictionaries, making it easy to filter, process, or integrate with other tools.
-
 ## Understanding the Output
 
 ### CVE Object Structure
@@ -147,17 +122,6 @@ Each CVE returned by the fetcher is a dictionary with the following structure:
 
 The `affected_products` field is particularly useful. It extracts vendor and product names from the CPE (Common Platform Enumeration) data, making it easier to see what's actually vulnerable without parsing CPE strings yourself.
 
-## Rate Limiting
-
-The NVD API has strict rate limits to prevent abuse. This tool automatically handles rate limiting based on whether you have an API key:
-
-- **Without API key**: Waits 6 seconds between requests (5 requests per 30 seconds)
-- **With API key**: Waits 0.6 seconds between requests (50 requests per 30 seconds)
-
-The rate limiting happens automatically. You don't need to do anything special. When fetching large numbers of CVEs, the tool will paginate through results and wait appropriately between pages.
-
-If you're running into rate limit errors, make sure you're not running multiple instances of the fetcher simultaneously. Also verify that your API key is correctly set in the configuration.
-
 ## Error Handling
 
 The tool includes comprehensive error handling:
@@ -193,26 +157,6 @@ The keyword search function searches through CVE descriptions. Here are some eff
 
 Keep in mind that keyword search is case-insensitive and matches anywhere in the description. For best results, use specific technology names or library identifiers rather than generic terms.
 
-## Logging
-
-The tool uses Python's standard logging module. By default, it logs at INFO level, showing:
-- When fetching starts and completes
-- Progress updates during large fetches
-- Errors and warnings
-- Summary statistics
-
-You can adjust the logging level by modifying the `logging.basicConfig()` call in `cve_fetcher.py` if you need more or less verbosity.
-
-## Output Files
-
-When you run the default script, it saves all fetched CVEs to `recent_cves.json`. This file contains a JSON array of all CVE objects, making it easy to:
-- Share results with team members
-- Import into other analysis tools
-- Build dashboards or reports
-- Track changes over time (by comparing files from different runs)
-
-The JSON is pretty-printed with 2-space indentation for readability. The file uses UTF-8 encoding and preserves all special characters.
-
 ## Troubleshooting
 
 **Problem: Getting rate limit errors even with an API key**
@@ -230,47 +174,6 @@ The default timeout is 30 seconds. If you're on a slow connection or the NVD API
 **Problem: Missing CVSS scores**
 
 Some older CVEs might not have CVSS v3 scores. The tool falls back to defaults (score 0.0, severity UNKNOWN) when scores aren't available. Check the `raw_data` field if you need to extract CVSS v2 scores or other metrics.
-
-## Integration Ideas
-
-This tool is designed to be a building block. Here are some ways you could extend it:
-
-- **Automated alerts**: Run on a schedule and send notifications for high-severity CVEs matching your stack
-- **Database storage**: Parse the JSON output and store CVEs in a database for historical tracking
-- **Dashboard**: Build a web interface to visualize CVE trends and filter by technology
-- **CI/CD integration**: Check for new CVEs affecting your dependencies as part of your build process
-- **Blockchain analysis**: Combine with protocol-specific data to assess actual risk to your smart contracts
-
-## API Reference
-
-### CVEFetcher Class
-
-#### `__init__(api_key: Optional[str] = None)`
-
-Initialize the CVE fetcher. The API key is optional but recommended for higher rate limits.
-
-#### `fetch_recent_cves(days: int = 7) -> List[Dict[str, Any]]`
-
-Fetch all CVEs published in the last N days. Returns a list of CVE dictionaries.
-
-**Parameters:**
-- `days`: Number of days to look back (must be positive)
-
-**Raises:**
-- `InvalidInputError`: If days is not positive
-- `APIRequestError`: If the API request fails
-
-#### `search_cves_by_keyword(keyword: str, days: Optional[int] = 30) -> List[Dict[str, Any]]`
-
-Search for CVEs containing a specific keyword in their description.
-
-**Parameters:**
-- `keyword`: The search term (cannot be empty)
-- `days`: Number of days to look back, or None to search all time
-
-**Raises:**
-- `InvalidInputError`: If keyword is empty or days is negative
-- `APIRequestError`: If the API request fails
 
 ## Resources
 
