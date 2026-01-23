@@ -4,8 +4,9 @@ A Python tool that monitors the National Vulnerability Database (NVD) for Common
 
 ## What It Does
 
-The CVE Fetcher provides a clean interface to the NVD API v2.0, allowing you to:
+The CVE Scraper provides a clean interface to the NVD API v2.0, allowing you to:
 
+**Features:**
 - Fetch all CVEs published within a specified time window
 - Search for CVEs matching specific keywords or technologies
 - Extract structured information including severity scores, affected products, and references
@@ -14,173 +15,123 @@ The CVE Fetcher provides a clean interface to the NVD API v2.0, allowing you to:
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.7 or higher
-- pip package manager
-
-### Setup Steps
-
-1. Clone or download this repository
-
-2. Install the required dependencies:
+**Requirements:** Python 3.7+
 
 ```bash
-pip3 install -r requirements.txt
+git clone <your-repo>
+cd CVE_FETCHER
+pip install -r requirements.txt
 ```
 
-The main dependency is the `requests` library for HTTP calls to the NVD API.
+Optional: Get an NVD API key for higher rate limits (5 requests/30sec without key, 50 requests/30sec with key):
 
-3. (Optional) Obtain an NVD API key
+Visit [NVD API key request page](https://nvd.nist.gov/developers/request-an-api-key) to get a free API key.
 
-While the tool works without an API key, having one significantly increases your rate limits:
-- Without key: 5 requests per 30 seconds
-- With key: 50 requests per 30 seconds
+## Usage
 
-To get a free API key, visit the [NVD API key request page](https://nvd.nist.gov/developers/request-an-api-key). The process is straightforward and usually takes just a few minutes.
+### Quick Start
 
-## Configuration
-
-All configuration is done through the `config.py` file. Open it and adjust these settings:
+1. Configure settings in `config.py`:
 
 ```python
-# NVD API key (optional but recommended)
-# Leave as None if you don't have a key yet
-API_KEY = None
-
-# How many days back to fetch CVEs
-# Set to 7 for a week, 30 for a month, etc.
+API_KEY = None  # Optional: your NVD API key
 RECENT_CVE_DAYS = 3
-
-# Keyword to search for in CVE descriptions
-# Useful for finding vulnerabilities in specific technologies
 KEYWORD_SEARCH_TERM = 'blockchain'
-
-# How many days back to search when using keyword search
 KEYWORD_SEARCH_DAYS = 90
 ```
 
-The configuration is straightforward. If you're just getting started, the defaults will work fine. Adjust `RECENT_CVE_DAYS` based on how frequently you want to run the fetcher. For daily monitoring, 1-3 days is usually sufficient. For weekly reports, 7 days makes sense.
-
-## Basic Usage
-
-### Running the Default Script
-
-The simplest way to use the tool is to run the included script:
+2. Run the scraper:
 
 ```bash
 python3 cve_fetcher.py
 ```
 
-This will:
-1. Fetch all CVEs from the last N days (as specified in `config.py`)
-2. Display high and critical severity CVEs in the console
-3. Search for CVEs matching your keyword term
-4. Save all fetched CVEs to `recent_cves.json`
+This fetches recent CVEs, displays high-severity ones, searches by keyword, and saves results to `recent_cves.json`.
 
-The output includes severity scores, publication dates, descriptions, affected products, and reference counts for each CVE.
+### Programmatic Usage
 
-## Understanding the Output
+```python
+from cve_fetcher import CVEFetcher
 
-### CVE Object Structure
+fetcher = CVEFetcher(api_key="your-api-key-here")
 
-Each CVE returned by the fetcher is a dictionary with the following structure:
+# Fetch recent CVEs
+recent_cves = fetcher.fetch_recent_cves(days=7)
+
+# Search by keyword
+blockchain_cves = fetcher.search_cves_by_keyword('solidity', days=30)
+```
+
+## CVE Data Structure
+
+Each CVE object contains:
 
 ```python
 {
     'id': 'CVE-2024-12345',
     'description': 'A detailed description of the vulnerability...',
-    'severity': 'HIGH',  # One of: LOW, MEDIUM, HIGH, CRITICAL
-    'base_score': 7.5,   # CVSS base score from 0.0 to 10.0
+    'severity': 'HIGH',  # LOW, MEDIUM, HIGH, CRITICAL
+    'base_score': 7.5,   # CVSS score (0.0 to 10.0)
     'published': '2024-01-15T10:15:08.000',
     'last_modified': '2024-01-15T10:15:08.000',
-    'references': [
-        'https://example.com/advisory',
-        'https://github.com/...'
-    ],
-    'affected_products': [
-        'vendor/product:version',
-        'another-vendor/another-product:1.2.3'
-    ],
-    'raw_data': {
-        # Complete NVD API response for advanced analysis
-    }
+    'references': ['https://example.com/advisory', ...],
+    'affected_products': ['vendor/product:version', ...],
+    'raw_data': {...}  # Complete NVD API response
 }
 ```
 
-### Key Fields Explained
+**Key Fields:**
+- `id`: CVE identifier (e.g., CVE-2024-12345)
+- `severity`: Text severity level (LOW, MEDIUM, HIGH, CRITICAL)
+- `base_score`: Numeric CVSS score where higher means more severe
+- `affected_products`: Parsed vendor/product combinations from CPE data
+- `references`: URLs to advisories, patches, or exploit details
+- `raw_data`: Full API response for advanced analysis
 
-- **id**: The CVE identifier (e.g., CVE-2024-12345)
-- **description**: Human-readable description of the vulnerability
-- **severity**: Text severity level based on CVSS scoring
-- **base_score**: Numeric CVSS score where higher means more severe
-- **published**: When the CVE was first published
-- **last_modified**: When the CVE record was last updated
-- **references**: URLs to advisories, patches, or exploit details
-- **affected_products**: Parsed list of vendor/product combinations
-- **raw_data**: Full API response if you need access to additional fields
+## Output
 
-The `affected_products` field is particularly useful. It extracts vendor and product names from the CPE (Common Platform Enumeration) data, making it easier to see what's actually vulnerable without parsing CPE strings yourself.
+Results are saved to `recent_cves.json` by default. The JSON file contains:
+- Array of all fetched CVE objects
+- Pretty-printed with 2-space indentation
+- UTF-8 encoding preserving special characters
 
-## Error Handling
-
-The tool includes comprehensive error handling:
-
-- **APIRequestError**: Raised when API calls fail (network issues, timeouts, HTTP errors)
-- **InvalidInputError**: Raised when you provide invalid parameters (negative days, empty keywords, etc.)
-
-All errors are logged with context, making it easier to debug issues. The tool also handles malformed API responses gracefully, skipping problematic CVEs and continuing with the rest.
+Use the output to:
+- Share results with team members
+- Import into other analysis tools
+- Build dashboards or reports
+- Track changes over time
 
 ## Keyword Search Tips
 
-The keyword search function searches through CVE descriptions. Here are some effective keywords for different use cases:
+Effective keywords for different use cases:
 
 **Blockchain and Smart Contracts:**
-- `solidity`
-- `smart contract`
-- `ethereum`
-- `web3`
-- `blockchain`
-- `defi`
-- `nft`
+- `solidity`, `smart contract`, `ethereum`, `web3`, `blockchain`, `defi`, `nft`
 
 **Specific Libraries:**
-- `openzeppelin`
-- `hardhat`
-- `truffle`
-- `web3.js`
+- `openzeppelin`, `hardhat`, `truffle`, `web3.js`
 
 **General Security:**
-- `remote code execution`
-- `sql injection`
-- `authentication bypass`
+- `remote code execution`, `sql injection`, `authentication bypass`
 
-Keep in mind that keyword search is case-insensitive and matches anywhere in the description. For best results, use specific technology names or library identifiers rather than generic terms.
+Keyword search is case-insensitive and matches anywhere in the description. Use specific technology names or library identifiers for best results.
 
 ## Troubleshooting
 
-**Problem: Getting rate limit errors even with an API key**
+**Rate limit errors even with API key?** Verify your API key is correctly set in `config.py` as a string (not None). Make sure you're not running multiple instances simultaneously.
 
-Make sure your API key is correctly set in `config.py`. The key should be a string, not None. Also verify that you're not running multiple instances simultaneously.
+**No CVEs returned for keyword search?** Try broadening your search terms or removing the date restriction. Some CVEs use different terminology.
 
-**Problem: No CVEs returned for a keyword search**
+**Timeout errors?** The default timeout is 30 seconds. Increase the `REQUEST_TIMEOUT` constant in the `CVEFetcher` class if needed.
 
-Try broadening your search. Some CVEs might use different terminology. Also check that your date range isn't too restrictive. Try searching without a date limit first to see if any results exist.
+**Missing CVSS scores?** Some older CVEs don't have CVSS v3 scores. The tool falls back to defaults (score 0.0, severity UNKNOWN). Check `raw_data` for CVSS v2 scores or other metrics.
 
-**Problem: Timeout errors**
+## License
 
-The default timeout is 30 seconds. If you're on a slow connection or the NVD API is experiencing issues, you might need to increase the `REQUEST_TIMEOUT` constant in the `CVEFetcher` class.
-
-**Problem: Missing CVSS scores**
-
-Some older CVEs might not have CVSS v3 scores. The tool falls back to defaults (score 0.0, severity UNKNOWN) when scores aren't available. Check the `raw_data` field if you need to extract CVSS v2 scores or other metrics.
+This project is provided as-is for security research and monitoring purposes. Make sure to comply with the NVD API terms of service when using this tool.
 
 ## Resources
 
 - [NVD API Documentation](https://nvd.nist.gov/developers/vulnerabilities): Official API reference
 - [CVSS Scoring Guide](https://www.first.org/cvss/v3.1/user-guide): Understanding severity scores
 - [CPE Dictionary](https://nvd.nist.gov/products/cpe): Common Platform Enumeration reference
-
-## License
-
-This project is provided as-is for security research and monitoring purposes. Make sure to comply with the NVD API terms of service when using this tool.
