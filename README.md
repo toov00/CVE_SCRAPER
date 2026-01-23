@@ -93,12 +93,6 @@ Results are saved to `recent_cves.json` by default. The JSON file contains:
 - Pretty-printed with 2-space indentation
 - UTF-8 encoding preserving special characters
 
-Use the output to:
-- Share results with team members
-- Import into other analysis tools
-- Build dashboards or reports
-- Track changes over time
-
 ## Keyword Search Tips
 
 Effective keywords for different use cases:
