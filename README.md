@@ -46,20 +46,6 @@ python3 cve_fetcher.py
 
 This fetches recent CVEs, displays high-severity ones, searches by keyword, and saves results to `recent_cves.json`.
 
-### Programmatic Usage
-
-```python
-from cve_fetcher import CVEFetcher
-
-fetcher = CVEFetcher(api_key="your-api-key-here")
-
-# Fetch recent CVEs
-recent_cves = fetcher.fetch_recent_cves(days=7)
-
-# Search by keyword
-blockchain_cves = fetcher.search_cves_by_keyword('solidity', days=30)
-```
-
 ## Output
 
 Results are saved to `recent_cves.json` by default. The JSON file contains:
